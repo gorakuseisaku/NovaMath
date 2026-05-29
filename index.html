@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++ WebAssembly アプリ</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background: #f8f9fa; color: #333; }
+        h1 {padding: 0.25em 0.5em;color: #494949;background: transparent;border-left: solid 5px #7db4e6;
+           width: 0;
+            animation: typing 2s steps(25) 1s forwords,
+                        blink 0.75s step-end infinite;
+            
+           }
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+            to {
+                width: 26%;
+            }
+        }
+        @keyframes blink {
+            50% {
+                border-color: transparent;
+            }
+        }
+        .section-title { font-size: 16px; font-weight: bold; margin-top: 20px; margin-bottom: 8px; color: #007bff; }
+        .input-area { width: 100%; box-sizing: border-box; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 5px; font-family: monospace; resize: vertical; }
+        .controls { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        input[type="text"] { flex: 1; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px; }
+        button { padding: 12px 24px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        textarea.output { width: 100%; box-sizing: border-box; background: #222; color: #fff; font-family: monospace; padding: 12px; border-radius: 6px; font-size: 14px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+    <h1>C++ テキスト入力処理アプリ（スマホ対応）</h1>
+    <div class="section-title">① テキストファイルの中身を入力してください</div>
+    <textarea id="fileContentInput" class="input-area" rows="8" placeholder="ここにファイルの中身（テキスト）を直接入力してください..."></textarea>
+
+    <div class="section-title">② コマンドライン引数と実行</div>
+    <div class="controls">
+        <input type="text" id="argsInput" value="sample.nmath" placeholder="引数（例: sample.nmath）を入力">
+        <button onclick="runCppWithVirtualFile()">実行</button>
+        <button onclick="downloadFile()">ダウンロード</button>
+    </div>
+
+    <div class="section-title">③ C++ 実行結果</div>
+    <textarea id="output" class="output" rows="15" readonly>読み込み中...</textarea>
+
+    <script>
+        var Module = {
+            print: (function() {
+                var element = document.getElementById('output');
+                if (element) element.value = ''; 
+                return function(text) {
+                    if (element) {
+                        element.value += text + "\n"; 
+                        element.scrollTop = element.scrollHeight; 
+                    }
+                };
+            })(),
+            onRuntimeInitialized: function() {
+                document.getElementById('output').value = "準備完了。上のエリアにテキストを入力して「実行」を押してください。\n";
+            }
+        };
+
+        function runCppWithVirtualFile() {
+            document.getElementById('output').value = ""; 
+
+            const argsValue = document.getElementById('argsInput').value;
+            const argsArray = argsValue.split(' ').filter(arg => arg.length > 0);
+            
+            const fileName = argsArray[0]; 
+            if (!fileName) {
+                alert("引数（ファイル名）を入力してください。");
+                return;
+            }
+
+            const fileContent = document.getElementById('fileContentInput').value;
+
+            try {
+                Module.FS.writeFile(fileName, fileContent);
+              
+                Module.callMain(argsArray);
+            } catch (e) {
+                document.getElementById('output').value = "エラーが発生しました:\n" + e;
+            }
+        }
+        function downloadFile() {
+            const fileContent = document.getElementById('fileContentInput').value;
+            const argsValue = document.getElementById('argsInput').value;
+            const argsArray = argsValue.split(' ').filter(arg => arg.length > 0);
+            const fileName = argsArray.length > 0 ? argsArray[0] : 'sample.nmath';
+            const blob = new Blob([fileContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+    <script async src="program.js"></script>
+</body>
+</html>
