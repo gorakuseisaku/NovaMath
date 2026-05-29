@@ -1,0 +1,14 @@
+x = 0
+theta = 0
+y = 0
+
+expr1 = sin(x) * sin(x) * cos(x) + cos(x) * cos(x) * cos(x)
+expr2 = (sin(theta) + cos(theta)) * (sin(theta) + cos(theta)) - 2 * sin(theta) * cos(theta)
+expr3 = tan(theta) + 1 / tan(theta)
+
+eq1 = 2 * sin(theta) - sqrt(3)
+eq2 = 2 * cos(x) * cos(x) - sin(x) - 1
+ineq1 = cos(2 * theta) - sin(theta)
+
+func1 = sin(x) * sin(x) - 4 * sin(x) + 1
+func2 = sin(theta) + sqrt(3) * cos(theta)

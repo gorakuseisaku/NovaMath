@@ -1,0 +1,5 @@
+BUILTIN(sin)
+BUILTIN(cos)
+BUILTIN(tan)
+BUILTIN(sqrt)
+BUILTIN(abs)
