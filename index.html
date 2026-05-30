@@ -53,7 +53,9 @@
             const argsValue = document.getElementById('argsInput').value;
             const argsArray = argsValue.split(' ').filter(arg => arg.length > 0);
             
-            const fileName = argsArray.length > 0 ? argsArray[0] : 'sample'; 
+            const fileName = argsArray.length > 0 ? argsArray[0] : 'sample';
+            fileName += ".nmath";
+            argsArray[0] = fileName;
             if (!fileName) {
                 alert("引数（ファイル名）を入力してください。");
                 return;
@@ -62,7 +64,7 @@
             const fileContent = document.getElementById('fileContentInput').value;
 
             try {
-                Module.FS.writeFile(fileName + ".nmath", fileContent);
+                Module.FS.writeFile(fileName, fileContent);
               
                 Module.callMain(argsArray);
             } catch (e) {
