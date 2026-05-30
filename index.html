@@ -64,7 +64,7 @@
             try {
                 Module.FS.writeFile(fileName + ".nmath", fileContent);
               
-                Module.callMain(argsArray);
+                Module.callMain(argsArray + ".nmath");
             } catch (e) {
                 document.getElementById('output').value = "エラーが発生しました:\n" + e;
             }
