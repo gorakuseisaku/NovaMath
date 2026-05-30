@@ -51,16 +51,14 @@
             document.getElementById('output').value = ""; 
 
             const argsValue = document.getElementById('argsInput').value;
-            const argsArray = argsValue.split(' ').filter(arg => arg.length > 0);
+            let argsArray = argsValue.split(' ').filter(arg => arg.length > 0);
             
-            const fileName = argsArray.length > 0 ? argsArray[0] : 'sample';
-            fileName += ".nmath";
-            argsArray[0] = fileName;
+            const fileName = argsArray.length > 0 ? argsArray[0] + ".nmath : 'sample.nmath';
             if (!fileName) {
                 alert("引数（ファイル名）を入力してください。");
                 return;
             }
-
+            argsArray[0] = fileName;
             const fileContent = document.getElementById('fileContentInput').value;
 
             try {
