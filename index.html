@@ -22,7 +22,7 @@
 
     <div class="section-title">② コマンドライン引数と実行</div>
     <div class="controls">
-        <input type="text" id="argsInput" value="sample.nmath" placeholder="引数（例: sample.nmath）を入力">
+        <input type="text" id="argsInput" value="sample" placeholder="引数（例: sample）を入力">
         <button onclick="runCppWithVirtualFile()">実行</button>
         <button onclick="downloadFile()">ダウンロード</button>
     </div>
@@ -73,12 +73,12 @@
             const fileContent = document.getElementById('fileContentInput').value;
             const argsValue = document.getElementById('argsInput').value;
             const argsArray = argsValue.split(' ').filter(arg => arg.length > 0);
-            const fileName = argsArray.length > 0 ? argsArray[0] : 'sample.nmath';
+            const fileName = argsArray.length > 0 ? argsArray[0] : 'sample';
             const blob = new Blob([fileContent], { type: 'application/octet-stream' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = fileName;
+            link.download = fileName　+ "nmath";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
