@@ -53,7 +53,7 @@
             const argsValue = document.getElementById('argsInput').value;
             const argsArray = argsValue.split(' ').filter(arg => arg.length > 0);
             
-            const fileName = argsArray[0]; 
+            const fileName = argsArray.length > 0 ? argsArray[0] : 'sample'; 
             if (!fileName) {
                 alert("引数（ファイル名）を入力してください。");
                 return;
