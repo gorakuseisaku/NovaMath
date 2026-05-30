@@ -74,7 +74,7 @@
             const argsValue = document.getElementById('argsInput').value;
             const argsArray = argsValue.split(' ').filter(arg => arg.length > 0);
             const fileName = argsArray.length > 0 ? argsArray[0] : 'sample.nmath';
-            const blob = new Blob([fileContent], { type: 'text/plain' });
+            const blob = new Blob([fileContent], { type: 'application/octet-stream' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
