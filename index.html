@@ -59,10 +59,10 @@
                 return;
             }
 
-            const fileContent = document.getElementById('fileContentInput').value + ".nmath";
+            const fileContent = document.getElementById('fileContentInput').value;
 
             try {
-                Module.FS.writeFile(fileName, fileContent);
+                Module.FS.writeFile(fileName + ".nmath", fileContent);
               
                 Module.callMain(argsArray);
             } catch (e) {
