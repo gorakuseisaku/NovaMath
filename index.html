@@ -53,13 +53,13 @@
             const argsValue = document.getElementById('argsInput').value;
             const argsArray = argsValue.split(' ').filter(arg => arg.length > 0);
             
-            const fileName = argsArray[0] + ".nmath"; 
+            const fileName = argsArray[0]; 
             if (!fileName) {
                 alert("引数（ファイル名）を入力してください。");
                 return;
             }
 
-            const fileContent = document.getElementById('fileContentInput').value;
+            const fileContent = document.getElementById('fileContentInput').value + ".nmath";
 
             try {
                 Module.FS.writeFile(fileName, fileContent);
