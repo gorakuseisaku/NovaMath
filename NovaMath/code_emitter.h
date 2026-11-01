@@ -6,8 +6,10 @@
 class CodeEmitter {
 public:
 	CodeEmitter() = default;
-	void Emit4(OpCode op, uint16_t a = 0, uint16_t b = 0, uint16_t c = 0) {
+	size_t Emit4(OpCode op, uint16_t a = 0, uint16_t b = 0, uint16_t c = 0) {
+		size_t size = code.size();
 		code.push_back(Instr{ op,a,b,c });
+		return size;
 	}
 	std::vector<Instr> code;
 };

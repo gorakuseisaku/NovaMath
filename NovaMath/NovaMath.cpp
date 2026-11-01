@@ -9,8 +9,7 @@ int main(int argc,char* argv[])
         VM vm(argv[1]);
         auto start = std::chrono::high_resolution_clock::now();
 
-        double finalValue = 0.0;
-        finalValue = vm.Run();
+        vm.Run();
         
 
         // 🏁 計測終了
@@ -20,7 +19,8 @@ int main(int argc,char* argv[])
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
         std::cout << "--- 計測結果 ---" << std::endl;
-        std::cout << "計算結果: " << std::setprecision(16) << finalValue << std::endl;
+        std::cout << "計算結果: " << std::setprecision(16) << '\n';
+        vm.PrintAnswers();
         std::cout << "処理時間: " << duration << " us (マイクロ秒)" << std::endl;
     }
     catch(const std::exception& e) {

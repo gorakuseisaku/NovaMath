@@ -12,6 +12,8 @@ A fast and lightweight domain-specific language for mathematical evaluations, bu
 - **変数と組み込み関数 (Variables & Built-in Functions)**:
   - 柔軟な変数定義と再代入
   - 組み込み関数を標準サポート: 三角関数 (`sin`, `cos`, `tan`), 絶対値 (`abs`), 平方根 (`sqrt`)
+  - 関数の宣言をサポート: f(x) = x ^ 2 + x + 3, f(x,y) = sqrt(x ^ 2 + y ^ 2)
+
 
 ## 使い方 (Usage)
 
@@ -21,7 +23,7 @@ A fast and lightweight domain-specific language for mathematical evaluations, bu
 ```text
 x = 4.0
 y = sqrt(x) + abs(-5.5)
-result = sin(y)
+@ans = sin(y)
 ```
 
 ### 2. コマンドラインからの実行 (Execution)
@@ -62,12 +64,12 @@ Instead of building and traversing an AST, this project compiles code into custo
   ```text
   a = 2.5
   b = 3.5
-  result = (a + b) * (b - a) / (a * 2.0) + sqrt(a * a + b * b) - abs(a - b)
+  @ans = (a + b) * (b - a) / (a * 2.0) + sqrt(a * a + b * b) - abs(a - b)
   ```
-- **合計処理時間**: **3 µs** (3マイクロ秒)
-- **計算結果**: `4.501162633521314` (理論値と完全一致)
+- **合計処理時間**: **5 µs** (5マイクロ秒)
+- **計算結果**: `4.50116263352131` (理論値と完全一致)
 
-長大な構文であっても、Prattパーサーによる1パスバイトコード生成と、レジスタ保護を両立。レジスタ型VM上での評価までをわずか3マイクロ秒という極限の低レイテンシで処理しており、本DSLの圧倒的な軽量性とキレの良さを証明しています。
+長大な構文であっても、Prattパーサーによる1パスバイトコード生成と、レジスタ保護を両立。レジスタ型VM上での評価までをわずか5マイクロ秒という極限の低レイテンシで処理しており、本DSLの圧倒的な軽量性とキレの良さを証明しています。
 
 ### ベンチマークB: 究極ストレス環境・限界突破テスト（O(N)スケーラビリティ＆コンパイラ最適化検証）
 約30個の永続変数、何重にもクロスした変数依存、大量の組み込み関数呼び出しを含む、言語システムとしての限界値に挑む超長大スクリプトの、1発の処理速度を計測しました。

@@ -27,6 +27,7 @@ class Parser {
 public:
 	Parser(std::vector<Token>& tokens,Program& prog) : tokens(tokens),prog(prog),currentToken(&tokens[0]){
 		InitRules();
+		localsStack.push_back({});
 	}
 	void Parse();
 	std::vector<Instr>& GetBin();
@@ -45,13 +46,16 @@ private:
 	bool IsAtEnd();
 	void InitRules();
 	void Advance();
+	Token* Consume();
 	double ParseCall();
 	uint16_t AddConst(double value);
+	uint16_t Adduint32(uint32_t value);
 	Token* Expect(TokenType type);
 	ExprResult NudIdent();
 	ExprResult NudNumber();
 	ExprResult NudParen();
 	ExprResult NudMinus();
+	ExprResult LedHat(ExprResult left);
 	ExprResult LedPlus(ExprResult left);
 	ExprResult LedMinus(ExprResult left);
 	ExprResult LedMulti(ExprResult left);
@@ -60,8 +64,12 @@ private:
 	ExprResult LedAssign(ExprResult left);
 	Token* Peek(int offset = 1);
 	bool Match(TokenType type);
+	Locals& CurrentLocals() {
+		return localsStack.back();
+	}
 	Program& prog;
-	Locals localTable;
+	std::vector<Locals> localsStack;
+	Functions funcTable;
 	RegisterAllocater regAlloc;
 	Constance constance;
 	CodeEmitter emitter;

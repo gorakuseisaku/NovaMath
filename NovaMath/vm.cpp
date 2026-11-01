@@ -1,15 +1,19 @@
 #include "vm.h"
 #include "op_func.h"
-double VM::Run()
+void VM::Run()
 {
-	uint8_t lastDst = 0;
-	const Instr* const startIp = bin.data();
-	const Instr* const endIp = bin.data() + bin.size();
-	const Instr* ip = startIp;
-	while (ip < endIp) {
-		lastDst = ip->a;
-		opFuncTable[(uint8_t)ip->op](*ip, *this);
-		++ip;
+	answers.clear();
+	const size_t size = bin.size();
+	while (pc < size) {
+		Instr instr = bin[pc];
+		opFuncTable[(uint8_t)instr.op](bin[pc], *this);
 	}
-	return regs[lastDst];
+}
+
+void VM::PrintAnswers()
+{
+	size_t size = answers.size();
+	for (int i = 0; i < size; ++i) {
+		std::printf("ans%i = %.15g\n",i, answers[i]);
+	}
 }

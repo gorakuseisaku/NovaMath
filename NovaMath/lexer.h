@@ -18,10 +18,10 @@ private:
 	void Skip();
 	void ReadNumber();
 	void ReadIdent();
-	static std::unordered_map<std::string, TokenType,StringViewHash, std::equal_to<>> KEYWORDS;
+	static std::unordered_map<std::string, TokenType,StringViewHash, std::equal_to<void>> KEYWORDS;
 	std::string_view code;
 	char currentChar;
 	size_t pos = 0;
-	size_t line = 0;
+	size_t line = 1;
 	size_t length = 0;
 };

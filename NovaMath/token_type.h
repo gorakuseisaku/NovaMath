@@ -1,6 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include <iostream>
 #include <string>
 enum class TokenType : uint8_t {
 #define TYPE(name) name,

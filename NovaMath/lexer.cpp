@@ -2,8 +2,9 @@
 #include "error.h"
 #include <cctype>
 #include "parser.h"
-std::unordered_map<std::string, TokenType, StringViewHash, std::equal_to<>> Lexer::KEYWORDS = {
-	{"@debug",TokenType::DEBUG}
+std::unordered_map<std::string, TokenType, StringViewHash, std::equal_to<void>> Lexer::KEYWORDS = {
+	{"@debug",TokenType::DEBUG},
+	{"@ans",TokenType::ANS}
 };
 void Lexer::Tokenize()
 {
@@ -13,6 +14,10 @@ void Lexer::Tokenize()
 		Skip();
 		switch (currentChar)
 		{
+		case ('^'):
+			tokens.push_back(Token(TokenType::HAT, "^", line));
+			Advance();
+			continue;
 		case('*'):
 			tokens.push_back(Token(TokenType::MULTI,"*",line));
 			Advance();
@@ -116,7 +121,7 @@ void Lexer::ReadNumber()
 void Lexer::ReadIdent()
 {
 	int startPos = pos;
-	while (isalnum(static_cast<unsigned char>(currentChar)) || currentChar == '_' || currentChar == '@') Advance();
+	while (pos < code.size() && (isalnum(static_cast<unsigned char>(currentChar)) || currentChar == '_' || currentChar == '@')) Advance();
 	std::string_view text(&code[startPos], pos - startPos);
 	auto it = KEYWORDS.find(text);
 	if (it != KEYWORDS.end()) {

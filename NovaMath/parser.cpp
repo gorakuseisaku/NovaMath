@@ -7,7 +7,7 @@ Parser::ParseRule Parser::rules[(uint8_t)TokenType::COUNT];
 void Parser::InitRules()
 {
 	using enum Precedense;
-	for (int i = 0; i < (uint8_t)TokenType::COUNT; i++) {
+	for (int i = 0; i < (uint8_t)TokenType::COUNT; ++i) {
 		rules[i] = { nullptr,nullptr,PREC_NONE };
 	}
 	rules[(uint8_t)TokenType::NUMBER] = { &Parser::NudNumber,nullptr,PREC_NONE };
@@ -16,17 +16,13 @@ void Parser::InitRules()
 	rules[(uint8_t)TokenType::MINUS] = { &Parser::NudMinus,&Parser::LedMinus,PREC_SUM };
 	rules[(uint8_t)TokenType::PLUS] = { nullptr,&Parser::LedPlus,PREC_SUM };
 	rules[(uint8_t)TokenType::MULTI] = { nullptr,&Parser::LedMulti,PREC_PRODUCT };
+	rules[(uint8_t)TokenType::HAT] = { nullptr,&Parser::LedHat,PREC_PRODUCT };
 	rules[(uint8_t)TokenType::DIV] = { nullptr,&Parser::LedDiv,PREC_PRODUCT };
 	rules[(uint8_t)TokenType::EQUAL] = { nullptr,&Parser::LedAssign,PREC_ASSIGN };
 }
 void Parser::Parse() {
-	ExprResult final;
 	while (!IsAtEnd()) {
-		final = ParseStatement();
-	}
-	uint16_t dst = regAlloc.Alloc();
-	if (final.type == Type::CONST) {
-		emitter.Emit4(OpCode::LOAD_CONST, dst, AddConst(final.value));
+		ParseStatement();
 	}
 	if (isDebug) {
 		std::cout << "Parsing succeeded" << '\n';
@@ -39,17 +35,33 @@ ExprResult Parser::ParseStatement() {
 	ExprResult result;
 	switch (currentToken->type) {
 	case (TokenType::DEBUG):
-		Expect(TokenType::DEBUG);
 		isDebug = true;
+		Expect(TokenType::DEBUG);
 		break;
+	case(TokenType::ANS):
+	{
+		Expect(TokenType::ANS);
+		Expect(TokenType::EQUAL);
+		ExprResult right = ParseExpression((int)Precedense::PREC_ASSIGN - 1);
+		uint16_t dst = regAlloc.Alloc();
+		if (right.type == Type::CONST) {
+			emitter.Emit4(OpCode::LOAD_CONST, dst, AddConst(right.value));
+		}
+		else if (right.type == Type::REG) {
+			emitter.Emit4(OpCode::MOV, dst, right.reg);
+			regAlloc.DeleteReg(right.reg);
+		}
+		emitter.Emit4(OpCode::ANS, dst);
+		break;
+	}
 	case(TokenType::IDENT):
 		if (Peek()->type == TokenType::EQUAL) {
 			Token* name = Expect(TokenType::IDENT);
 			Expect(TokenType::EQUAL);
 			ExprResult right = ParseExpression((int)Precedense::PREC_ASSIGN - 1);
 			Local local;
-			if (!localTable.IsDefined(name->text)) {
-				local = localTable.DefineLocal(name->text);
+			if (!CurrentLocals().IsDefined(name->text)) {
+				local = CurrentLocals().DefineLocal(name->text);
 			}
 			if (right.type == Type::CONST) {
 				emitter.Emit4(OpCode::LOAD_CONST, local.slot, AddConst(right.value));
@@ -58,6 +70,34 @@ ExprResult Parser::ParseStatement() {
 				emitter.Emit4(OpCode::MOV, local.slot, right.reg);
 				regAlloc.DeleteReg(right.reg);
 			}
+		}
+		else if (Peek()->type == TokenType::LPAREN) {
+			Token* name = Expect(TokenType::IDENT);
+			size_t defPos = emitter.Emit4(OpCode::DEF_FUNC, 0);
+			Function& func = funcTable.DefineFunction(name->text, emitter.code.size());
+			localsStack.push_back({});
+			CurrentLocals().BeginFunction();
+			Expect(TokenType::LPAREN);
+			if (currentToken->type != TokenType::RPAREN) {
+				do {
+					Token* name = Expect(TokenType::IDENT);
+					func.args.push_back(CurrentLocals().DefineLocal(name->text));
+				} while (Match(TokenType::COMMA));
+			}
+			Expect(TokenType::RPAREN);
+			Expect(TokenType::EQUAL);
+			uint16_t dst = regAlloc.Alloc();
+			ExprResult right = ParseExpression((int)Precedense::PREC_ASSIGN - 1);
+			if (right.type == Type::CONST) {
+				emitter.Emit4(OpCode::LOAD_CONST, dst, AddConst(right.value));
+			}
+			else if (right.type == Type::REG) {
+				emitter.Emit4(OpCode::MOV, dst, right.reg);
+				regAlloc.DeleteReg(right.reg);
+			}
+			localsStack.pop_back();
+			emitter.Emit4(OpCode::END_FUNC,dst);
+			emitter.code[defPos].a = Adduint32(emitter.code.size());
 		}
 		else {
 			result = ParseExpression();
@@ -92,6 +132,11 @@ void Parser::Advance() {
 		currentToken = &tokens[pos];
 	}
 }
+Token* Parser::Consume() {
+	Token* token = currentToken;
+	Advance();
+	return token;
+}
 double Parser::ParseCall() {
 	double argNum = 0.0;
 	if (currentToken->type != TokenType::RPAREN) {
@@ -120,6 +165,14 @@ uint16_t Parser::AddConst(double value) {
 	prog.doubleTable.push_back(value);
 	return static_cast<uint16_t>(idx);
 }
+uint16_t Parser::Adduint32(uint32_t value) {
+	size_t idx = prog.uint32Table.size();
+	for (int i = 0; i < idx; ++i) {
+		if (value == prog.uint32Table[i]) return i;
+	}
+	prog.uint32Table.push_back(value);
+	return static_cast<uint16_t>(idx);
+}
 Token* Parser::Expect(TokenType type) {
 	if (currentToken->type == type) {
 		Token* before = currentToken;
@@ -132,9 +185,8 @@ Token* Parser::Expect(TokenType type) {
 }
 ExprResult Parser::NudIdent() {
 	Token* token = Expect(TokenType::IDENT);
-	Local local;
-	if (localTable.IsDefined(token->text)) {
-		local = localTable.ResolveLocal(token->text);
+	Local local = CurrentLocals().ResolveLocal(token->text);
+	if (local.name != "") {
 		return ExprResult(local.slot);
 	}
 	double value = 0;
@@ -170,6 +222,29 @@ ExprResult Parser::NudMinus() {
 		regAlloc.DeleteReg(right.reg);
 		return ExprResult(dst);
 	}
+}
+ExprResult Parser::LedHat(ExprResult left) {
+	Expect(TokenType::HAT);
+	ExprResult right = ParseExpression((int)Precedense::PREC_PRODUCT);
+	if (left.type == Type::CONST && right.type == Type::CONST) {
+		left.value = std::pow(left.value, right.value);
+		return left;
+	}
+	if (left.type == Type::CONST) {
+		uint16_t reg = regAlloc.Alloc();
+		emitter.Emit4(OpCode::LOAD_CONST, reg, AddConst(left.value));
+		left = ExprResult(reg);
+	}
+	if (right.type == Type::CONST) {
+		uint16_t reg = regAlloc.Alloc();
+		emitter.Emit4(OpCode::LOAD_CONST, reg, AddConst(right.value));
+		right = ExprResult(reg);
+	}
+	uint16_t dst = regAlloc.Alloc();
+	emitter.Emit4(OpCode::EXP, dst, left.reg, right.reg);
+	regAlloc.DeleteReg(left.reg);
+	regAlloc.DeleteReg(right.reg);
+	return ExprResult(dst);
 }
 ExprResult Parser::LedPlus(ExprResult left) {
 	Expect(TokenType::PLUS);
@@ -273,12 +348,17 @@ ExprResult Parser::LedParen(ExprResult left) {
 	if (constance.GetBuiltin(name->text, funcId)) {
 		uint16_t dst = regAlloc.Alloc();
 		double argNum = ParseCall();
-		emitter.Emit4(OpCode::CALL_BUILTIN,dst, funcId, AddConst(argNum));
+		emitter.Emit4(OpCode::CALL_BUILTIN, dst, funcId, AddConst(argNum));
 		return ExprResult(dst);
 	}
-	else {
-		Error("The function is not supported");
+	Function func = funcTable.ResolveFunction(name->text);
+	if (func.name != "") {
+		uint16_t dst = regAlloc.Alloc();
+		double argNum = ParseCall();
+		emitter.Emit4(OpCode::CALL_FUNC, dst,Adduint32(func.pos),AddConst(argNum));
+		return ExprResult(dst);
 	}
+	Error("The function is not defined");
 	return ExprResult();
 }
 ExprResult Parser::LedAssign(ExprResult left) {
@@ -286,8 +366,8 @@ ExprResult Parser::LedAssign(ExprResult left) {
 	Expect(TokenType::EQUAL);
 	ExprResult right = ParseExpression((int)Precedense::PREC_ASSIGN - 1);
 	Local local;
-	if (!localTable.IsDefined(name->text)) {
-		local = localTable.DefineLocal(name->text);
+	if (!CurrentLocals().IsDefined(name->text)) {
+		local = CurrentLocals().DefineLocal(name->text);
 	}
 	if (right.type == Type::CONST) {
 		emitter.Emit4(OpCode::LOAD_CONST, local.slot, AddConst(right.value));
