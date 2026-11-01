@@ -1,5 +1,6 @@
 #include "vm.h"
 #include "op_func.h"
+#include <cstdio>
 void VM::Run()
 {
 	answers.clear();
