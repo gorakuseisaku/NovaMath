@@ -8,11 +8,16 @@ A fast and lightweight domain-specific language for mathematical evaluations, bu
 ## 主な特徴 (Features)
 
 - **独自拡張子 `.nmath`**: 外部ファイルに記述された数式スクリプトを読み込み、ダイレクトにパース・実行します。
-- **高速な実行速度 (High Performance)**: C++の強みを活かし、高速な計算を実現しています。
+- **高速な実行速度 (High Performance)**: C++の強みを活かし、マイクロ秒単位の高速な計算を実現しています。
+- **豊富な制御構文と演算子 (Control Flows & Operators)**:
+  - ループ処理と条件分岐 (`for`, `if`, `else`) を完全サポート
+  - 複合代入 (`+=`, `-=`, `*=`, `/=`) やインクリメント・デクリメント (`++`, `--`) に対応
+  - べき乗演算子 (`^`) や、`#` によるコメントアウトをサポート
 - **変数と組み込み関数 (Variables & Built-in Functions)**:
-  - 柔軟な変数定義と再代入
+  - 柔軟な変数定義、再代入、および `@ans =` による最終出力
   - 組み込み関数を標準サポート: 三角関数 (`sin`, `cos`, `tan`), 絶対値 (`abs`), 平方根 (`sqrt`)
-  - 関数の宣言をサポート: f(x) = x ^ 2 + x + 3, f(x,y) = sqrt(x ^ 2 + y ^ 2)
+  - 関数の宣言をサポート: `f(x) = x ^ 2 + x + 3`, `f(x,y) = sqrt(x ^ 2 + y ^ 2)`
+
 
 
 ## 使い方 (Usage)
