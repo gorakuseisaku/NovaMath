@@ -21,7 +21,8 @@ jobs:
 
       - name: Compile C++ to WebAssembly
         run: |
-          em++ -std=c++20 -O3 NovaMath/*.cpp -o program.js -s WASM=1 -s INVOKE_RUN=0 -s FORCE_FILESYSTEM=1 -s EXPORTED_RUNTIME_METHODS="['callMain','FS']" -s ALLOW_MEMORY_GROWTH=1
+          em++ -std=c++20 -O0 -g4 -s ASSERTIONS=1 -s ALLOW_MEMORY_GROWTH=1 NovaMath/*.cpp -o program.js -s WASM=1 -s INVOKE_RUN=0 -s FORCE_FILESYSTEM=1 -s EXPORTED_RUNTIME_METHODS="['callMain','FS']"
+
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
