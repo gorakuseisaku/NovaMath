@@ -2,6 +2,11 @@
 #include "vm_ctx.h"
 #include "op_func.h"
 #include <cstdio>
+void VM::Init(std::string_view filePath)
+{
+	valueStack.reserve(MAX_ARG_NUM);
+	Compile(filePath, prog, &bin);
+}
 void VM::Run()
 {
 	answers.clear();

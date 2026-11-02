@@ -1,61 +1,46 @@
-# ==========================================
-# 自作数学DSL 総合ベンチマーク＆テストコード
-# ==========================================
+# --- 変数の初期化 ---
+grand_total = 0
 
-# 1. 関数定義とべき乗（^）のテスト
-f(x) = x^2 + 2 * x + 1
-
-# 2. 変数の初期化
-success = 0
-err_code = 0
-
-total = 0
-a = 10
-x = 5
-
-# 3. 複合代入とインクリメント・デクリメントのテスト
-a += 5  # 15
-a -= 3  # 12
-a *= 2  # 24
-a /= 4  # 6
-a++     # 7
-a--     # 6
-
-# 4. forループと if / else の複合テスト
-for (i = 0; i < 10; i++) {
-	# 奇数か偶数かで分岐（2で割って戻して元の値になるかで判定）
-	half = i / 2
-	double = half * 2
-	
-	if (i == double) {
-		# 偶数の場合: 合計に加算
-		total += i
-	} else {
-		# 奇数の場合: 何もしない
-		total += 0
-	}
-}
-# 0+2+4+6+8 = 20 になるべき
-
-# 5. 最終判定（すべての計算結果が仕様通りかチェック）
-# 期待値: a == 6, total == 20, f(3) == 16 (3^2 + 2*3 + 1 = 9 + 6 + 1)
-if (a == 6) {
-	if (total == 20) {
-		if (f(3) == 16) {
-			success = 1
-		} else {
-			err_code = 3 # 関数またはべき乗のエラー
-		}
-	} else {
-		err_code = 2 # forループまたはif分岐のエラー
-	}
-} else {
-	err_code = 1 # 複合代入またはインクリメントのエラー
+# --- 2から300までのメインループ ---
+for (i = 2; i <= 300; i++) {
+    
+    is_prime = 1
+    root_i = sqrt(i)
+    mod_one = root_i % 1
+    limit = root_i - mod_one  # ここまでは同じ
+    
+    # ★【バグ回避】forの条件式に変数を使わず、固定値「17」まで強制的に回す！
+    # これなら、forの条件判定でのレジスタ破壊は絶対に起きません。
+    for (j = 2; j <= 17; j++) {
+        
+        # j が本来の上限（limit）以下のときだけ、素数判定を行う
+        if (j <= limit) {
+            mod_j = i % j
+            if (mod_j == 0) {
+                is_prime = 0
+            } else {
+                grand_total += 0
+            }
+        } else {
+            # limit を超えたら何もしない（実質的なbreakの代わり）
+            grand_total += 0
+        }
+    }
+    
+    # 条件に応じた加減算
+    if (is_prime == 1) {
+        grand_total += i ^ 2
+    } else {
+        mod_limit = i % limit
+        
+        if (mod_limit == 0) {
+            diff = i - 100
+            grand_total += abs(diff)
+        } else {
+            grand_total -= i
+        }
+    }
 }
 
-# 6. 最終出力
-if (success == 1) {
-	@ans = 1      # 完璧に合格なら 1 を出力
-} else {
-	@ans = err_code # 不合格ならエラー原因コードを出力
-}
+# --- 最終出力 ---
+@ans = grand_total

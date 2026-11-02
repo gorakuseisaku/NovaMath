@@ -366,7 +366,7 @@ ExprResult Parser::LedAddEqual(ExprResult left) {
 		emitter.Emit4(OpCode::ADDEQK, left.reg, AddConst(right.value));
 	}
 	else if (right.type == Type::REG) {
-		emitter.Emit4(OpCode::ADDEQR, left.reg, AddConst(right.value));
+		emitter.Emit4(OpCode::ADDEQR, left.reg, right.reg);
 	}
 	return left;
 }
@@ -377,7 +377,7 @@ ExprResult Parser::LedSubEqual(ExprResult left) {
 		emitter.Emit4(OpCode::SUBEQK, left.reg, AddConst(right.value));
 	}
 	else if (right.type == Type::REG) {
-		emitter.Emit4(OpCode::SUBEQR, left.reg, AddConst(right.value));
+		emitter.Emit4(OpCode::SUBEQR, left.reg, right.reg);
 	}
 	return left;
 }
@@ -388,7 +388,7 @@ ExprResult Parser::LedMulEqual(ExprResult left) {
 		emitter.Emit4(OpCode::MULEQK, left.reg, AddConst(right.value));
 	}
 	else if (right.type == Type::REG) {
-		emitter.Emit4(OpCode::MULEQR, left.reg, AddConst(right.value));
+		emitter.Emit4(OpCode::MULEQR, left.reg, right.reg);
 	}
 	return left;
 }
@@ -399,7 +399,7 @@ ExprResult Parser::LedDivEqual(ExprResult left) {
 		emitter.Emit4(OpCode::DIVEQK, left.reg, AddConst(right.value));
 	}
 	else if (right.type == Type::REG) {
-		emitter.Emit4(OpCode::DIVEQR, left.reg, AddConst(right.value));
+		emitter.Emit4(OpCode::DIVEQR, left.reg, right.reg);
 	}
 	return left;
 }
@@ -517,11 +517,11 @@ ExprResult Parser::LedLE(ExprResult left) {
 	}
 	uint16_t dst = regAlloc.Alloc();
 	if (left.type == Type::CONST && right.type == Type::REG) {
-		emitter.Emit4(OpCode::LESSKR, dst, AddConst(left.value), right.reg);
+		emitter.Emit4(OpCode::LESSRK, dst, right.reg, AddConst(left.value));
 		emitter.Emit4(OpCode::NOT, dst);
 	}
 	if (left.type == Type::REG && right.type == Type::CONST) {
-		emitter.Emit4(OpCode::LESSRK, dst, left.reg, AddConst(right.value));
+		emitter.Emit4(OpCode::LESSKR, dst,  AddConst(right.value),left.reg);
 		emitter.Emit4(OpCode::NOT, dst);
 	}
 	if (left.type == Type::REG && right.type == Type::REG) {

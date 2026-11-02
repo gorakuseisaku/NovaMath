@@ -19,10 +19,9 @@ public:
 	std::vector<Instr> bin;
 	Program prog;
 	VMCtxPool vmCtxPool;
-	VM(std::string_view filePath) {
-		valueStack.reserve(MAX_ARG_NUM);
-		Compile(filePath, prog, &bin);
-	}
+	VM() = default;
+	~VM() = default;
+	void Init(std::string_view filePath);
 	void Run();
 	void PrintAnswers();
 	void ExecuteVM(size_t ctxIdx);
