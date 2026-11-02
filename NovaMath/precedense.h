@@ -3,6 +3,7 @@
 enum class Precedense {
 	PREC_NONE = 0,
 	PREC_ASSIGN,
+	PREC_EQUALITY,
 	PREC_COMPARE,
 	PREC_SUM,
 	PREC_PRODUCT,

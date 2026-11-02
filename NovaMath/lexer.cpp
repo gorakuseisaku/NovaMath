@@ -4,7 +4,10 @@
 #include "parser.h"
 std::unordered_map<std::string, TokenType, StringViewHash, std::equal_to<void>> Lexer::KEYWORDS = {
 	{"@debug",TokenType::DEBUG},
-	{"@ans",TokenType::ANS}
+	{"@ans",TokenType::ANS},
+	{"if",TokenType::IF},
+	{"else",TokenType::ELSE},
+	{"for",TokenType::FOR}
 };
 void Lexer::Tokenize()
 {
@@ -12,6 +15,59 @@ void Lexer::Tokenize()
 	tokens.clear();
 	while (currentChar != '\0') {
 		Skip();
+		if (pos + 1 < code.length()) {
+			std::string_view op2 = code.substr(pos, 2);
+			if (op2 == "++") {
+				tokens.push_back(Token(TokenType::PLUS_PLUS, "++", line));
+				Advance(); Advance();
+				continue;
+			}
+			if (op2 == "--") {
+				tokens.push_back(Token(TokenType::MINUS_MINUS, "--", line));
+				Advance(); Advance();
+				continue;
+			}
+			if (op2 == "+=") {
+				tokens.push_back(Token(TokenType::PLUS_EQUAL, "+=", line));
+				Advance(); Advance();
+				continue;
+			}
+			if (op2 == "-=") {
+				tokens.push_back(Token(TokenType::MINUS_EQUAL, "-=", line));
+				Advance(); Advance();
+				continue;
+			}
+			if (op2 == "*=") {
+				tokens.push_back(Token(TokenType::STAR_EQUAL, "*=", line));
+				Advance(); Advance();
+				continue;
+			}
+			if (op2 == "/=") {
+				tokens.push_back(Token(TokenType::SLASH_EQUAL, "/=", line));
+				Advance(); Advance();
+				continue;
+			}
+			if (op2 == "<=") { 
+				tokens.push_back(Token(TokenType::LE, "<=", line)); 
+				Advance(); Advance();
+				continue; 
+			}
+			if (op2 == ">=") {
+				tokens.push_back(Token(TokenType::GE, ">=", line));
+				Advance(); Advance();
+				continue;
+			}
+			if (op2 == "==") {
+				tokens.push_back(Token(TokenType::EE, "==", line));
+				Advance(); Advance();
+				continue;
+			}
+			if (op2 == "!=") {
+				tokens.push_back(Token(TokenType::NE, "^", line));
+				Advance(); Advance();
+				continue;
+			}
+		}
 		switch (currentChar)
 		{
 		case ('^'):
@@ -20,6 +76,10 @@ void Lexer::Tokenize()
 			continue;
 		case('*'):
 			tokens.push_back(Token(TokenType::MULTI,"*",line));
+			Advance();
+			continue;
+		case('%'):
+			tokens.push_back(Token(TokenType::PERCENT, "%", line));
 			Advance();
 			continue;
 		case('+'):
@@ -42,12 +102,36 @@ void Lexer::Tokenize()
 			tokens.push_back(Token(TokenType::RPAREN,")",line));
 			Advance();
 			continue;
+		case('{'):
+			tokens.push_back(Token(TokenType::LBRACE, "{", line));
+			Advance();
+			continue;
+		case('}'):
+			tokens.push_back(Token(TokenType::RBRACE, "}", line));
+			Advance();
+			continue;
+		case('<'):
+			tokens.push_back(Token(TokenType::LESS, "<", line));
+			Advance();
+			continue;
+		case('>'):
+			tokens.push_back(Token(TokenType::GREATER, ">", line));
+			Advance();
+			continue;
 		case('='):
 			tokens.push_back(Token(TokenType::EQUAL,"=",line));
 			Advance();
 			continue;
+		case('!'):
+			tokens.push_back(Token(TokenType::NOT, "!", line));
+			Advance();
+			continue;
 		case(','):
 			tokens.push_back(Token(TokenType::COMMA, ",",line));
+			Advance();
+			continue;
+		case(';'):
+			tokens.push_back(Token(TokenType::SEMICOLON, ";", line));
 			Advance();
 			continue;
 		}

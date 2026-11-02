@@ -189,6 +189,8 @@
     <ClInclude Include="token.h" />
     <ClInclude Include="token_type.h" />
     <ClInclude Include="vm.h" />
+    <ClInclude Include="vm_ctx.h" />
+    <ClInclude Include="vm_ctx_pool.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="constant.inc">

@@ -11,5 +11,8 @@ public:
 		code.push_back(Instr{ op,a,b,c });
 		return size;
 	}
+	uint32_t GetCurrentIp() const {
+		return static_cast<uint32_t>(code.size());
+	}
 	std::vector<Instr> code;
 };
