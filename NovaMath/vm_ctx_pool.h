@@ -1,14 +1,16 @@
 #pragma once
-#include <array>
+#include <vector>
 #include <bit>
 #include <optional>
 #include "vm_ctx.h"
-constexpr size_t MAX_VM_CTX_NUM = 128;
+constexpr size_t MAX_VM_CTX_NUM = 64;
 class VMCtxPool {
 private:
-	std::array<VMCtx,MAX_VM_CTX_NUM> vmCtx;
-	std::array<uint64_t, MAX_VM_CTX_NUM / 64> masks;
+	std::vector<VMCtx> vmCtx;
+	std::vector<uint64_t> masks;
 public:
+	VMCtxPool() : vmCtx(MAX_VM_CTX_NUM), masks(MAX_VM_CTX_NUM / 64, 0) {}
+	~VMCtxPool() = default;
 	std::optional<size_t> Create() {
 		for (int i = 0; i < masks.size(); ++i) {
 			if (masks[i] == 0xFFFFFFFFFFFFFFFFULL) {
